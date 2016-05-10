@@ -1,44 +1,49 @@
 function myMove(){
-	var elems = [document.getElementById("one"),document.getElementById("two")];
-	var pos = [getPosition(elems[0]), getPosition(elems[1])];
-	var vel = [[0,0],[0,0]];
-	var accel = [[0,0],[0,0]];
+	var elems = [document.getElementById("one"),document.getElementById("two"),document.getElementById("three")];
+	var pos = [getPosition(elems[0]), getPosition(elems[1]), getPosition(elems[2])];
+	var vel = [[0,0],[0,0],[0,0]];
+	var accel = [[0,0],[0,0],[0,0]];
 	var sprintConstant = 0.003;
 	var electrostatic = -10000;
 	var id = setInterval(frame, 30);
-	function frame(){
-		elems = [document.getElementById("one"),document.getElementById("two")];
+	function frame(){	
+		elems = [document.getElementById("one"),document.getElementById("two"),document.getElementById("three")];
 		updateAcceleration();
 		updateSpeed();
 		updatePosition();
 	}
 	function updateAcceleration(){
-		var distance = Math.sqrt(Math.pow(pos[0].x-pos[1].x, 2)+Math.pow(pos[0].y-pos[1].y,2));
-		var magnitude = (distance*sprintConstant+electrostatic/Math.pow(distance,2));
-		accel[0][0] = magnitude*(pos[1].x-pos[0].x)/distance;
-		accel[0][1] = magnitude*(pos[1].y-pos[0].y)/distance;
-		accel[1][0] = -accel[0][0];
-		accel[1][1] = -accel[0][1];
+		accel = [[0,0],[0,0],[0,0]];
+		pos = [getPosition(elems[0]), getPosition(elems[1]), getPosition(elems[2])];
+		for(var i = 0; i < 3; i++){
+			for(var j = 0; j < 3; j ++){
+				if(i == j){
+					continue;
+				}
+				var distance = Math.sqrt(Math.pow(pos[i].x-pos[j].x, 2)+Math.pow(pos[i].y-pos[j].y,2));
+				var magnitude = (distance*sprintConstant+electrostatic/Math.pow(distance,2));
+				accel[i][0] += magnitude*(pos[j].x-pos[i].x)/distance;
+				accel[i][1] += magnitude*(pos[j].y-pos[i].y)/distance;
+				accel[j][0] -= accel[i][0];
+				accel[j][1] -= accel[i][1];
+			}
+		}
 	}
 	function updateSpeed(){
-		vel[0][0] += accel[0][0];
-		vel[0][1] += accel[0][1];
-		vel[1][1] += accel[1][1];
-		vel[1][0] += accel[1][0];
-		vel[0][0] *= 0.99;
-		vel[0][1] *= 0.99;
-		vel[1][0] *= 0.99;
-		vel[1][1] *= 0.99;
+		for(var i = 0; i < 3; i ++){
+			for(var j = 0; j < 2; j ++){
+				vel[i][j] += accel[i][j];
+				vel[i][j] *= 0.99;
+			}
+		}
 	}
 	function updatePosition(){
-		elems[0].style.left = pos[0].x + vel[0][0] + "px";
-		elems[0].style.top = pos[0].y + vel[0][1] + "px";
-		elems[1].style.left = pos[1].x + vel[1][0] + "px";
-		elems[1].style.top = pos[1].y + vel[1][1] + "px";
-		pos[0].x += vel[0][0];
-		pos[0].y += vel[0][1];
-		pos[1].x += vel[1][0];
-		pos[1].y += vel[1][1];
+		for(var i = 0; i < 3; i ++){
+			elems[i].style.left = pos[i].x + vel[i][0] + "px";
+			elems[i].style.top = pos[i].y + vel[i][1] + "px";
+			pos[i].x += vel[i][0];
+			pos[i].y += vel[i][1];
+		}
   	}
 }
 function getPosition(el){
